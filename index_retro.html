@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secret Hitler - Distribuidor de Roles</title>
+  <meta name="description" content="Herramienta para repartir roles de Secret Hitler con estética retro de juego de mesa." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --parchment: #efe3c3;
+      --parchment-dark: #e2d3ad;
+      --ink: #1c1a19;
+      --red: #b23b2a;
+      --blue: #0e5e6f;
+      --gold:#c79d3c;
+      --shadow: rgba(0,0,0,.25);
+      --muted: #645c52;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: "Crimson Text", Georgia, serif;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at top left, rgba(255,255,255,.15), transparent 60%),
+        radial-gradient(ellipse at bottom right, rgba(0,0,0,.08), transparent 60%),
+        linear-gradient(180deg, var(--parchment) 0%, var(--parchment-dark) 100%);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0,0,0,.018) 0px, rgba(0,0,0,.018) 1px, transparent 1px, transparent 2px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,.018) 0px, rgba(0,0,0,.018) 1px, transparent 1px, transparent 2px);
+      pointer-events:none; opacity:.45;
+    }
+
+    .container{max-width:980px;margin:0 auto;padding:28px 20px;position:relative;z-index:1}
+
+    .header{margin-bottom:28px; text-align:center; position:relative;}
+    .banner{
+      display:inline-block; padding:16px 26px; background: var(--ink);
+      color:#f5e9c9; border:4px solid var(--gold);
+      box-shadow: 0 6px 0 var(--gold), 0 12px 18px var(--shadow);
+      transform: skewX(-2deg);
+    }
+    .title{
+      font-family:"Oswald", system-ui, -apple-system, sans-serif;
+      font-weight:700; letter-spacing:.06em; font-size:2.6rem; line-height:1;
+      text-transform:uppercase;
+    }
+    .subtitle{
+      margin-top:8px; font-family:"Special Elite", monospace; font-size:1rem; opacity:.9;
+      letter-spacing:.02em;
+    }
+
+    .panel{
+      background: #f7edcf;
+      border: 3px solid var(--ink);
+      border-radius: 6px;
+      box-shadow: inset 0 0 0 3px #f0e5c5, 0 10px 20px var(--shadow);
+      padding: 20px;
+    }
+
+    .setup-section{ margin-bottom:22px; }
+    .player-selector{text-align:center;margin-bottom:16px}
+    .player-selector h3{
+      font-family:"Oswald"; text-transform:uppercase; letter-spacing:.06em;
+      font-size:1.1rem; color:var(--ink); margin-bottom:14px;
+    }
+
+    .player-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+    .btn{
+      appearance:none; border:none; cursor:pointer;
+      padding:10px 16px; border:2px solid var(--ink); border-radius:4px;
+      background:linear-gradient(180deg,#f6ead0,#eadfbf);
+      color:var(--ink); font-family:"Oswald"; text-transform:uppercase; letter-spacing:.06em;
+      box-shadow: 0 3px 0 var(--ink), 0 6px 12px rgba(0,0,0,.15);
+      transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); }
+    .btn:active{ transform: translateY(2px); box-shadow: 0 1px 0 var(--ink), 0 3px 6px rgba(0,0,0,.15); }
+    .btn.active{ background:linear-gradient(180deg,#ffe9b2,#f1d98d); }
+
+    .role-info{ margin-top:18px }
+    .role-distribution{ display:flex;flex-wrap:wrap;justify-content:center; gap:14px; margin-top:10px }
+
+    .role-group{
+      min-width:150px; text-align:center;
+      background:#fff6d9; border:2px solid var(--ink); border-radius:4px;
+      box-shadow: 0 3px 0 var(--ink), 0 6px 14px rgba(0,0,0,.15);
+      padding:12px;
+    }
+    .role-group h4{
+      font-family:"Oswald"; text-transform:uppercase; letter-spacing:.08em; font-size:1rem;
+    }
+    .role-group .icon{ font-size:1.8rem; margin:6px 0 }
+
+    .role-group.liberal{ outline:4px solid var(--blue); }
+    .role-group.fascist{ outline:4px solid var(--red); }
+    .role-group.hitler{ outline:4px solid var(--gold); }
+
+    .distribute-btn{
+      margin:22px auto 4px; display:block;
+      background:linear-gradient(180deg,#e8cf8f,#d7b868);
+      color:var(--ink); border:3px solid var(--ink); border-radius:4px;
+      font-family:"Oswald"; text-transform:uppercase; letter-spacing:.08em; font-size:1.1rem;
+      padding:12px 28px; cursor:pointer;
+      box-shadow: 0 4px 0 var(--ink), 0 10px 18px rgba(0,0,0,.2);
+      transition: transform .08s ease, box-shadow .2s ease;
+    }
+    .distribute-btn:hover{ transform: translateY(-1px); }
+    .distribute-btn:active{ transform: translateY(2px); box-shadow: 0 2px 0 var(--ink), 0 6px 12px rgba(0,0,0,.2); }
+
+    .results-section{
+      display:none;
+      background: #f7edcf; border:3px solid var(--ink); border-radius:6px;
+      box-shadow: inset 0 0 0 3px #f0e5c5, 0 10px 20px var(--shadow);
+      padding:22px; text-align:center;
+    }
+    .results-section h2{
+      font-family:"Oswald"; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;
+    }
+    .results-section p{ color: var(--muted); }
+
+    .players-grid{
+      display:grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr));
+      gap:16px; margin:22px 0;
+    }
+
+    .player-card{
+      position:relative; overflow:hidden;
+      background: #fff6d9; border:2px solid var(--ink); border-radius:6px;
+      box-shadow: 0 4px 0 var(--ink), 0 10px 18px rgba(0,0,0,.18);
+      padding:16px; min-height:160px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      transition: transform .08s ease;
+    }
+    .player-card:hover:not(.revealed){ transform: translateY(-2px); }
+    .player-card.revealed{ opacity:.9; }
+
+    .player-name{
+      font-family:"Oswald"; text-transform:uppercase; letter-spacing:.08em;
+      font-size:1.1rem; margin-bottom:8px;
+    }
+    .role-hidden{
+      font-family:"Special Elite"; background:#f0e5c5; border:2px dashed var(--ink); border-radius:4px;
+      padding:12px 14px; text-align:center; line-height:1.2; user-select:none;
+    }
+    .role-display{ display:none; align-items:center; gap:8px; flex-direction:column; padding:6px; }
+    .role-display.show{ display:flex; }
+
+    .role-icon{ font-size:2rem; }
+    .role-name{
+      font-family:"Oswald"; letter-spacing:.06em; text-transform:uppercase;
+    }
+    .role-description{ font-size:.95rem; color:#4a433b; text-align:center }
+
+    .liberal-theme{ box-shadow: inset 0 0 0 5px var(--blue), 0 4px 0 var(--ink), 0 10px 18px rgba(0,0,0,.18); }
+    .fascist-theme{ box-shadow: inset 0 0 0 5px var(--red), 0 4px 0 var(--ink), 0 10px 18px rgba(0,0,0,.18); }
+    .hitler-theme{ box-shadow: inset 0 0 0 5px var(--gold), 0 4px 0 var(--ink), 0 10px 18px rgba(0,0,0,.18); }
+
+    .role-revealed-permanent{
+      display:none; font-family:"Special Elite"; color:#534b43; background:#eee1bc;
+      border:2px solid var(--ink); border-radius:4px; padding:10px 12px;
+    }
+
+    .new-game-btn{
+      background:linear-gradient(180deg,#e8cf8f,#d7b868);
+      color:var(--ink); border:3px solid var(--ink); border-radius:4px;
+      font-family:"Oswald"; text-transform:uppercase; letter-spacing:.08em; font-size:1rem;
+      padding:10px 22px; cursor:pointer;
+      box-shadow: 0 4px 0 var(--ink), 0 10px 18px rgba(0,0,0,.2);
+      transition: transform .08s ease, box-shadow .2s ease;
+    }
+    .new-game-btn:hover{ transform: translateY(-1px); }
+    .new-game-btn:active{ transform: translateY(2px); box-shadow: 0 2px 0 var(--ink), 0 6px 12px rgba(0,0,0,.2); }
+
+    .player-card::before, .player-card::after{
+      content:""; position:absolute; width:18px; height:18px; border:2px solid var(--ink);
+      top:6px; left:6px; border-right:none; border-bottom:none; opacity:.6;
+    }
+    .player-card::after{
+      top:auto; left:auto; right:6px; bottom:6px; border:2px solid var(--ink);
+      border-left:none; border-top:none;
+    }
+
+    @media (max-width: 768px){
+      .title{ font-size:2rem }
+      .container{ padding:18px 12px }
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(-120px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <noscript>Esta aplicación necesita JavaScript para funcionar.</noscript>
+
+  <div class="container">
+    <div class="header">
+      <div class="banner">
+        <div class="title">Secret Hitler</div>
+        <div class="subtitle">Distribuidor automático de roles — Estética retro</div>
+      </div>
+    </div>
+
+    <div class="setup-section panel" id="setupSection">
+      <div class="player-selector">
+        <h3>¿Cuántos jugadores sois?</h3>
+        <div class="player-buttons">
+          <button class="btn" onclick="selectPlayers(5, this)">5</button>
+          <button class="btn" onclick="selectPlayers(6, this)">6</button>
+          <button class="btn" onclick="selectPlayers(7, this)">7</button>
+          <button class="btn" onclick="selectPlayers(8, this)">8</button>
+          <button class="btn" onclick="selectPlayers(9, this)">9</button>
+          <button class="btn" onclick="selectPlayers(10, this)">10</button>
+        </div>
+      </div>
+
+      <div class="role-info" id="roleInfo" style="display:none;">
+        <h3 style="text-align:center; font-family:'Oswald'; text-transform:uppercase; letter-spacing:.06rem; margin-bottom:10px;">Distribución de Roles</h3>
+        <div class="role-distribution" id="roleDistribution"></div>
+        <button class="distribute-btn" onclick="distributeRoles()">🎲 Repartir roles</button>
+      </div>
+    </div>
+
+    <div class="results-section" id="resultsSection">
+      <h2>¡Roles distribuidos!</h2>
+      <p>Haz tap/click en tu tarjeta para ver tu rol. Tienes 5 segundos.</p>
+      <div class="players-grid" id="playersGrid"></div>
+      <button class="new-game-btn" onclick="newGame()">🔄 Nueva partida</button>
+    </div>
+  </div>
+
+  <script>
+    let selectedPlayers = 0;
+    let gameData = {};
+
+    const roleDistributions = {
+      5: { liberals: 3, fascists: 1, hitler: 1 },
+      6: { liberals: 4, fascists: 1, hitler: 1 },
+      7: { liberals: 4, fascists: 2, hitler: 1 },
+      8: { liberals: 5, fascists: 2, hitler: 1 },
+      9: { liberals: 5, fascists: 3, hitler: 1 },
+      10: { liberals: 6, fascists: 3, hitler: 1 }
+    };
+
+    const roleData = {
+      liberal: { name: 'Liberal', icon: '🕊️', description: 'Aprueba 5 políticas liberales o elimina a Hitler.' },
+      fascist: { name: 'Fascista', icon: '⚡', description: 'Aprueba 6 políticas fascistas o haz Canciller a Hitler.' },
+      hitler: { name: 'Hitler', icon: '👑', description: 'Con 3 políticas fascistas, conviértete en Canciller.' }
+    };
+
+    function selectPlayers(num, el){
+      selectedPlayers = num;
+      document.querySelectorAll('.player-buttons .btn').forEach(b=>b.classList.remove('active'));
+      if(el) el.classList.add('active');
+      showRoleInfo(num);
+    }
+
+    function showRoleInfo(num){
+      const roleInfo = document.getElementById('roleInfo');
+      const roleDistribution = document.getElementById('roleDistribution');
+      const d = roleDistributions[num];
+      roleDistribution.innerHTML = `
+        <div class="role-group liberal">
+          <h4>Liberales</h4>
+          <div class="icon">🕊️</div>
+          <div style="font-family:'Special Elite'; font-size:1.2rem;">${d.liberals}</div>
+        </div>
+        <div class="role-group fascist">
+          <h4>Fascistas</h4>
+          <div class="icon">⚡</div>
+          <div style="font-family:'Special Elite'; font-size:1.2rem;">${d.fascists}</div>
+        </div>
+        <div class="role-group hitler">
+          <h4>Hitler</h4>
+          <div class="icon">👑</div>
+          <div style="font-family:'Special Elite'; font-size:1.2rem;">${d.hitler}</div>
+        </div>`;
+      roleInfo.style.display = 'block';
+    }
+
+    function distributeRoles(){
+      if(!selectedPlayers) return;
+      const distribution = roleDistributions[selectedPlayers];
+      const roles = [];
+      for(let i=0; i<distribution.liberals; i++) roles.push('liberal');
+      for(let i=0; i<distribution.fascists; i++) roles.push('fascist');
+      for(let i=0; i<distribution.hitler; i++) roles.push('hitler');
+      shuffleArray(roles);
+      gameData = { players: selectedPlayers, roles };
+      showResults();
+    }
+
+    function shuffleArray(array){
+      for(let i=array.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function showResults(){
+      document.getElementById('setupSection').style.display = 'none';
+      const resultsSection = document.getElementById('resultsSection');
+      const playersGrid = document.getElementById('playersGrid');
+      resultsSection.style.display = 'block';
+      let html = '';
+      for(let i=0;i<selectedPlayers;i++){
+        const role = gameData.roles[i];
+        const data = roleData[role];
+        html += `
+          <div class="player-card" id="player-card-${i}" onclick="revealRole(${i})" role="button" aria-label="Carta del Jugador ${i+1}">
+            <div class="player-name">Jugador ${i+1}</div>
+            <div class="role-hidden" id="role-hidden-${i}">🎲 Tap para revelar</div>
+            <div class="role-display" id="role-display-${i}">
+              <div class="role-icon">${data.icon}</div>
+              <div class="role-name">${data.name}</div>
+              <div class="role-description">${data.description}</div>
+            </div>
+            <div class="role-revealed-permanent" id="role-permanent-${i}">
+              ✅ Rol revelado
+            </div>
+          </div>`;
+      }
+      playersGrid.innerHTML = html;
+    }
+
+    function revealRole(playerIndex){
+      const playerCard = document.getElementById(`player-card-${playerIndex}`);
+      const roleHidden = document.getElementById(`role-hidden-${playerIndex}`);
+      const roleDisplay = document.getElementById(`role-display-${playerIndex}`);
+      const rolePermanent = document.getElementById(`role-permanent-${playerIndex}`);
+      if(playerCard.classList.contains('revealed')) return;
+
+      const role = gameData.roles[playerIndex];
+
+      roleHidden.style.display = 'none';
+      roleDisplay.classList.add('show');
+      playerCard.classList.add(`${role}-theme`);
+
+      if(role === 'hitler') createConfetti();
+
+      setTimeout(()=>{
+        roleDisplay.classList.remove('show');
+        roleDisplay.style.display = 'none';
+        rolePermanent.style.display = 'inline-flex';
+        playerCard.classList.add('revealed');
+        playerCard.classList.remove('liberal-theme','fascist-theme','hitler-theme');
+      }, 5000);
+    }
+
+    function createConfetti(){
+      const colors = ['#b23b2a', '#c79d3c', '#0e5e6f', '#eadfbf'];
+      for(let i=0;i<40;i++){
+        setTimeout(()=>{
+          const c = document.createElement('div');
+          c.style.position = 'fixed';
+          c.style.left = Math.random()*100 + 'vw';
+          c.style.top = '-12px';
+          c.style.width = '10px';
+          c.style.height = '10px';
+          c.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+          c.style.zIndex = '9999';
+          c.style.borderRadius = '2px';
+          c.style.boxShadow = '0 1px 0 rgba(0,0,0,.2)';
+          c.style.animation = 'fall 3s linear forwards';
+          document.body.appendChild(c);
+          setTimeout(()=> c.remove(), 3200);
+        }, i*80);
+      }
+    }
+
+    function newGame(){
+      document.getElementById('setupSection').style.display = 'block';
+      document.getElementById('resultsSection').style.display = 'none';
+      selectedPlayers = 0; gameData = {};
+      document.querySelectorAll('.player-buttons .btn').forEach(btn=>btn.classList.remove('active'));
+      document.getElementById('roleInfo').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
